@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Domestic Shuffle Flights — ICE Air 2025</title>
+
+  <link href="https://unpkg.com/mapbox-gl@2.15.0/dist/mapbox-gl.css" rel="stylesheet" />
+  <script src="https://unpkg.com/mapbox-gl@2.15.0/dist/mapbox-gl.js"></script>
+  <script src="https://unpkg.com/deck.gl@8.9.0/dist.min.js"></script>
+  <script src="https://unpkg.com/papaparse@5.4.1/papaparse.min.js"></script>
+
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Inter:wght@300;400;500;600&display=swap');
+
+    :root {
+      --bg:        #0a0c10;
+      --panel-bg:  rgba(10, 12, 16, 0.92);
+      --border:    rgba(255, 255, 255, 0.08);
+      --text:      #e8e8e8;
+      --muted:     #666;
+      --accent:    #e63946;
+
+      --globalx:   #e63946;
+      --eastern:   #457b9d;
+      --avelo:     #f4c542;
+      --keylime:   #2dc653;
+      --uscg:      #9b5de5;
+      --csi:       #f77f00;
+      --other:     #888;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: var(--bg);
+      font-family: 'Inter', sans-serif;
+      color: var(--text);
+      overflow: hidden;
+      height: 100vh;
+      width: 100vw;
+    }
+
+    #map {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+    }
+
+    /* ── Panel ── */
+    #panel {
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.8s ease;
+      position: absolute;
+      top: 24px;
+      left: 24px;
+      width: 280px;
+      background: var(--panel-bg);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 24px 20px;
+      backdrop-filter: blur(12px);
+      z-index: 10;
+    }
+
+    #panel .label {
+      font-family: 'Inter', monospace;
+      font-size: 9px;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 6px;
+    }
+
+    #panel h1 {
+      font-family: 'Space Mono', monospace;
+      font-size: 15px;
+      font-weight: 700;
+      line-height: 1.4;
+      color: #fff;
+      margin-bottom: 6px;
+    }
+
+    #panel .subtitle {
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.6;
+      margin-bottom: 20px;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 16px;
+    }
+
+    .section-label {
+      font-family: 'Space Mono', monospace;
+      font-size: 9px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 10px;
+    }
+
+    /* ── Contractor Filters ── */
+    #contractors {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-bottom: 18px;
+    }
+
+    .contractor-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+    }
+
+    .contractor-row input[type="checkbox"] {
+      appearance: none;
+      width: 14px;
+      height: 14px;
+      border: 1px solid var(--border);
+      border-radius: 2px;
+      cursor: pointer;
+      position: relative;
+      flex-shrink: 0;
+      transition: background 0.15s;
+    }
+
+    .contractor-row input[type="checkbox"]:checked {
+      background: currentColor;
+    }
+
+    .contractor-row input[type="checkbox"]:checked::after {
+      content: '';
+      position: absolute;
+      left: 3px;
+      top: 1px;
+      width: 5px;
+      height: 8px;
+      border: 1.5px solid #0a0c10;
+      border-top: none;
+      border-left: none;
+      transform: rotate(45deg);
+    }
+
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .contractor-name {
+      font-size: 12px;
+      color: var(--text);
+      flex: 1;
+    }
+
+    .contractor-count {
+      font-family: 'Space Mono', monospace;
+      font-size: 10px;
+      color: var(--muted);
+    }
+
+    /* ── Toggle All ── */
+    #toggleAll {
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      font-family: 'Space Mono', monospace;
+      font-size: 9px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 6px 10px;
+      cursor: pointer;
+      border-radius: 2px;
+      margin-bottom: 20px;
+      transition: all 0.15s;
+      width: 100%;
+    }
+
+    #toggleAll:hover {
+      border-color: rgba(255,255,255,0.2);
+      color: var(--text);
+    }
+
+    /* ── Flight Counter ── */
+    .counter-block {
+      border-top: 1px solid var(--border);
+      padding-top: 16px;
+    }
+
+    .counter-number {
+      font-family: 'Inter', monospace;
+      font-size: 28px;
+      font-weight: 700;
+      color: #fff;
+      line-height: 1;
+      margin-bottom: 4px;
+    }
+
+    .counter-label {
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    /* ── Tooltip ── */
+    #tooltip {
+      position: absolute;
+      z-index: 20;
+      display: none;
+      background: rgba(10, 12, 16, 0.95);
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      padding: 10px 14px;
+      font-size: 12px;
+      line-height: 1.7;
+      pointer-events: none;
+      max-width: 240px;
+      backdrop-filter: blur(8px);
+    }
+
+    #tooltip strong {
+      display: block;
+      font-size: 13px;
+      color: #fff;
+      margin-bottom: 2px;
+    }
+
+    #tooltip .carrier-tag {
+      display: inline-block;
+      font-family: 'Space Mono', monospace;
+      font-size: 10px;
+      padding: 1px 6px;
+      border-radius: 2px;
+      margin-bottom: 2px;
+      color: #0a0c10;
+    }
+
+    #tooltip .meta {
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    /* ── Source note ── */
+    #source {
+      position: absolute;
+      bottom: 16px;
+      right: 16px;
+      font-size: 10px;
+      color: var(--muted);
+      z-index: 10;
+      text-align: right;
+      line-height: 1.6;
+    }
+
+    #source a {
+      color: var(--muted);
+      text-decoration: underline;
+    }
+
+    /* ── Loading ── */
+    #loading {
+      position: absolute;
+      inset: 0;
+      background: var(--bg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      flex-direction: column;
+      gap: 16px;
+      transition: opacity 0.4s;
+    }
+
+    #loading.hidden {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .loading-text {
+      font-family: 'Space Mono', monospace;
+      font-size: 12px;
+      color: var(--muted);
+      letter-spacing: 0.1em;
+    }
+
+    .spinner {
+      width: 24px;
+      height: 24px;
+      border: 2px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+    /* ══════════════════════════════════════
+       INTRO SEQUENCE
+    ══════════════════════════════════════ */
+
+    #intro {
+      position: fixed;
+      inset: 0;
+      z-index: 50;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: rgba(6, 8, 12, 0.82);
+      backdrop-filter: blur(2px);
+      cursor: pointer;
+      transition: opacity 0.8s ease;
+      padding: 40px;
+    }
+
+    #intro.hidden {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .intro-eyebrow {
+      font-family: 'Space Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 20px;
+      opacity: 0;
+      animation: fadeUp 0.8s ease 0.3s forwards;
+    }
+
+    .intro-title {
+      font-family: 'Inter', monospace;
+      font-size: clamp(36px, 6vw, 80px);
+      font-weight: 700;
+      color: #ffffff;
+      text-align: center;
+      line-height: 1.1;
+      letter-spacing: -0.02em;
+      margin-bottom: 16px;
+      opacity: 0;
+      animation: fadeUp 0.9s ease 0.5s forwards;
+    }
+
+    .intro-subtitle {
+      font-family: 'Inter', sans-serif;
+      font-size: clamp(14px, 2vw, 18px);
+      color: rgba(255,255,255,0.5);
+      text-align: center;
+      letter-spacing: 0.03em;
+      margin-bottom: 60px;
+      opacity: 0;
+      animation: fadeUp 0.9s ease 0.7s forwards;
+    }
+
+    .intro-body {
+      max-width: 560px;
+      font-family: 'Inter', sans-serif;
+      font-size: 15px;
+      line-height: 1.8;
+      color: rgba(255,255,255,0.75);
+      text-align: center;
+      opacity: 0;
+      transform: translateY(16px);
+      transition: opacity 0.7s ease, transform 0.7s ease;
+      margin-bottom: 48px;
+    }
+
+    .intro-body.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .intro-prompt {
+      font-family: 'Space Mono', monospace;
+      font-size: 9px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.25);
+      opacity: 0;
+      animation: fadeUp 0.9s ease 1.2s forwards;
+      transition: opacity 0.5s ease;
+    }
+
+    .intro-prompt.phase2 {
+      opacity: 1;
+    }
+
+    .intro-divider {
+      width: 40px;
+      height: 1px;
+      background: var(--accent);
+      margin: 0 auto 40px;
+      opacity: 0;
+      animation: fadeUp 0.9s ease 0.9s forwards;
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(12px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .month-btn.anim-current {
+      border-color: #fff;
+      color: #fff;
+      background: rgba(255,255,255,0.15);
+    }
+
+    #playMonths {
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      font-family: 'Space Mono', monospace;
+      font-size: 9px;
+      letter-spacing: 0.1em;
+      padding: 6px 10px;
+      cursor: pointer;
+      border-radius: 2px;
+      margin-bottom: 6px;
+      transition: all 0.15s;
+      width: 100%;
+    }
+
+    #playMonths:hover {
+      border-color: rgba(255,255,255,0.2);
+      color: var(--text);
+    }
+
+    #currentMonthLabel {
+      font-family: 'Space Mono', monospace;
+      font-size: 11px;
+      color: #fff;
+      text-align: center;
+      min-height: 16px;
+      margin-bottom: 10px;
+      letter-spacing: 0.08em;
+    }
+
+    /* ── Month Filter ── */
+    #months {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 5px;
+      margin-bottom: 10px;
+    }
+
+    .month-btn {
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      font-family: 'Space Mono', monospace;
+      font-size: 9px;
+      letter-spacing: 0.05em;
+      padding: 5px 4px;
+      cursor: pointer;
+      border-radius: 2px;
+      text-align: center;
+      transition: all 0.15s;
+    }
+
+    .month-btn.active {
+      border-color: rgba(255,255,255,0.35);
+      color: var(--text);
+      background: rgba(255,255,255,0.06);
+    }
+
+    .month-btn:hover {
+      border-color: rgba(255,255,255,0.2);
+      color: var(--text);
+    }
+
+    #toggleMonths {
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      font-family: 'Space Mono', monospace;
+      font-size: 9px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 6px 10px;
+      cursor: pointer;
+      border-radius: 2px;
+      margin-bottom: 20px;
+      transition: all 0.15s;
+      width: 100%;
+    }
+
+    #toggleMonths:hover {
+      border-color: rgba(255,255,255,0.2);
+      color: var(--text);
+    }
+
+    .section-divider {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 16px 0;
+    }
+
+  </style>
+</head>
+<body>
+
+  <div id="loading">
+    <div class="spinner"></div>
+    <div class="loading-text">Loading flight data...</div>
+  </div>
+
+  <div id="map"></div>
+
+  <div id="panel">
+    <div class="label">ICE Air Operations — 2025</div>
+    <h1>Domestic Shuffle<br>Flights</h1>
+    <p class="subtitle">
+      Internal transfers between U.S. detention facilities,
+      operated by private contractors on behalf of ICE.
+    </p>
+
+    <div class="section-label">Filter by Contractor</div>
+    <div id="contractors"></div>
+
+    <button id="toggleAll">Deselect All</button>
+
+
+    <hr class="section-divider">
+    <div class="section-label">Filter by Month</div>
+    <div id="months"></div>
+    <button id="toggleMonths">Deselect All</button>
+    <button id="playMonths">&#9654; Play</button>
+    <div id="currentMonthLabel"></div>
+
+    <div class="counter-block">
+      <div class="counter-number" id="flightCount">—</div>
+      <div class="counter-label">flights displayed</div>
+    </div>
+  </div>
+
+  <div id="tooltip"></div>
+
+  <div id="source">
+    Data: Human Rights First / IFM SITU, 2025<br>
+    Visualization: Jon Nealon / AGOG 510 Final Project
+  </div>
+
+
+  <!-- ── Intro Sequence ── -->
+  <div id="intro">
+    <div class="intro-eyebrow">ICE Air Operations &mdash; 2025</div>
+    <h2 class="intro-title">The Big Shuffle</h2>
+    <div class="intro-subtitle">Mapping the migrant detention flight network<br>Visualization by Jon Nealon<br>UAlbany AGOG 510</div>
+    <div class="intro-divider"></div>
+    <p class="intro-body" id="introBody">
+      In 2025, ICE Air operated over 8,700 domestic shuffle flights &mdash;
+      internal transfers between U.S. detention facilities serving no deportation
+      purpose. Flown by a small group of private contractors billing by the hour,
+      these flights generated millions in revenue while moving thousands of migrants
+      across the country. This map traces that network.
+    </p>
+    <div class="intro-prompt" id="introPrompt">Click anywhere to continue</div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>

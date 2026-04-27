@@ -1,0 +1,118 @@
+airport,city,lat,lon,departures,arrivals,total_flights
+Alexandria Intl (KAEX),"Alexandria, LA",31.3274006,-92.5451921,3491.0,3801.0,7292.0
+Valley Intl (KHRL),"Harlingen, TX",26.2234764,-97.6623631,2838.0,2877.0,5715.0
+El Paso Intl (KELP),"El Paso, TX",31.8058228,-106.3705379,1523.0,1522.0,3045.0
+Phoenix-Mesa Gateway (KIWA),"Phoenix, AZ",33.3089787,-111.6559353,1146.0,1136.0,2282.0
+Ramon Villeda Morales Int'l (SAP / MHLM),"San Pedro Sula, Honduras",15.4557387,-87.9270892999999,584.0,588.0,1172.0
+Opa-locka Executive (KOPF),"Miami, FL",25.9092857,-80.2683641,572.0,572.0,1144.0
+Youngstown/Warren Rgnl (KYNG),"Youngstown, OH",41.0997678,-80.6477199999999,522.0,514.0,1036.0
+Conroe/North Houston Rgnl (KCXO),"Houston, TX",30.3496944999999,-95.4139893,474.0,474.0,948.0
+San Antonio Intl (KSAT),"San Antonio, TX",29.5331282,-98.4705422,422.0,420.0,842.0
+Miramar Mcas (Joe Foss Fld) (KNKX),"San Diego, CA",32.8744638999999,-117.1378713,362.0,359.0,721.0
+Robert Gray Aaf (Fort Cavazos) (KGRK),"Killeen, TX",31.0616824,-97.8210702,339.0,329.0,668.0
+Jacksonville Intl (KJAX),"Jacksonville, FL",30.4943308,-81.6871496999999,296.0,270.0,566.0
+Newark Liberty Intl (KEWR),"Newark, NJ",40.6884837,-74.1768635999999,279.0,277.0,556.0
+Dallas Love Field (KDAL),"Dallas, TX",32.8438345,-96.8484951,229.0,213.0,442.0
+Lawson AAF (Fort Benning) (KLSF),"Columbus, GA",32.337925,-84.992149,191.0,187.0,378.0
+Minneapolis/St Paul Intl (KMSP),"Minneapolis, MN",44.8850593,-93.2144354,185.0,185.0,370.0
+Denver Intl (KDEN),"Denver, CO",39.8563486,-104.6764061,176.0,175.0,351.0
+Carlos Rovirosa Perez Int'l (VSA / MMVA),"Villahermosa, Mexico",17.9955072,-92.8173008999999,175.0,175.0,350.0
+So California Logistics (KVCV),"Victorville, CA",34.5839839,-117.3787064,173.0,173.0,346.0
+Luis Munoz Marin Intl (SJU / TJSJ),"San Juan, Puerto Rico",18.4395043,-65.9992275,166.0,176.0,342.0
+Richmond Intl (KRIC),"Richmond, VA",37.5105562,-77.3266991,166.0,166.0,332.0
+Laurence G Hanscom Fld (KBED),"Bedford, MA",42.4615318,-71.2913117,161.0,158.0,319.0
+Harry Reid Intl (KLAS),"Las Vegas, NV",36.0830907,-115.1482238,158.0,159.0,317.0
+Boeing Field Intl (KBFI),"Seattle, WA",47.5369043,-122.3038555,153.0,153.0,306.0
+Kansas City Intl (KMCI),"Kansas City, MO",39.3014091,-94.7104536,176.0,128.0,304.0
+Salt Lake City Intl (KSLC),"Salt Lake City, UT",40.7903145,-111.9771441,136.0,136.0,272.0
+Baltimore/Washington Intl (KBWI),"Baltimore, MD",39.1825364,-76.6694033,166.0,88.0,254.0
+Willow Run (KYIP),"Ypsilanti, MI",42.2349913,-83.5459542999999,128.0,119.0,247.0
+Miami Intl (KMIA),"Miami, FL",25.7923496,-80.2823059,123.0,122.0,245.0
+Jose Joaquin de Olmedo Int'l (GYE / SEGU),"Guayaquil, Ecuador",-2.230109,-79.9434312,118.0,120.0,238.0
+Buffalo Niagara Intl (KBUF),"Buffalo, NY",42.9394052,-78.7335011999999,115.0,115.0,230.0
+Tampa Intl (KTPA),"Tampa, FL",27.9768646,-82.5302804,129.0,85.0,214.0
+San Diego Intl (KSAN),"San Diego, CA",32.7328907,-117.1897122,107.0,106.0,213.0
+Eppley Airfield (KOMA),"Omaha, NE",41.3014753,-95.8945207,106.0,106.0,212.0
+Indianapolis Intl (KIND),"Indianapolis, IN",39.7222991999999,-86.3019561999999,102.0,101.0,203.0
+NAS Guantanamo Bay (NBW / MUGM),"Guantanamo Bay, Cuba",19.9147787,-75.1497792999999,99.0,103.0,202.0
+Dade-Collier Training (KTNT),"Ochopee, FL",25.8637999,-80.8979128,119.0,79.0,198.0
+Gary/Chicago Intl (KGYY),"Gary, IN",41.6177392,-87.408428,93.0,95.0,188.0
+Columbus (KCSG),"Columbus, GA",32.5173373,-84.9357844,92.0,88.0,180.0
+Lake City Gateway (KLCQ),"Lake City, FL",30.1868315,-82.580983,87.0,87.0,174.0
+Springfield (KSGF),"Springfield, MO",37.2454917,-93.3909351,62.0,60.0,122.0
+Las Americas (SDQ / MDSD),"Santo Domingo, Dominican Republic",18.4626178,-69.9360923999999,58.0,58.0,116.0
+Nashville Intl (KBNA),"Nashville, TN",36.1308194,-86.6661144999999,54.0,52.0,106.0
+Houston Bush Int'ctl (KIAH),"Houston, TX",29.9553767,-95.3268721,52.0,54.0,106.0
+Reno/Tahoe Intl (KRNO),"Reno, NV",39.50641,-119.775752,52.0,52.0,104.0
+Trenton Mercer (KTTN),"Mercer, NJ",40.2770583,-74.8181190999999,48.0,49.0,97.0
+Harrisburg Intl (KMDT),"Harrisburg, PA",40.1928753,-76.7538275,46.0,46.0,92.0
+Laredo Intl (KLRD),"Laredo, TX",27.5430371,-99.4621495999999,44.0,45.0,89.0
+Portsmouth Intl At Pease (KPSM),"Portsmouth, NH",43.082923,-70.8163728,40.0,39.0,79.0
+Northeast Alabama Rgnl (KGAD),"Gadsden, AL",34.005286,-86.0065489999999,63.0,0.0,63.0
+Abilene Rgnl (KABI),"Abilene, TX",32.4118941,-99.6800464,31.0,30.0,61.0
+Mexico City Santa Lucía Airport (NLU / MMSM),"Mexico City, Mexico",19.7352993,-99.0265202,31.0,30.0,61.0
+Tuscaloosa National Airport (KTCL),"Tuscaloosa, AL",33.2210007,-87.6096580999999,35.0,25.0,60.0
+Eugene F Kranz Toledo Express (KTOL),"Toledo, OH",41.5892503,-83.8037492999999,29.0,27.0,56.0
+Biggs Aaf (Fort Bliss) (KBIF),"El Paso, TX",31.8445399,-106.365838,30.0,26.0,56.0
+Halsey Field (KNZY),"San Diego, CA",32.6997036,-117.1830481,23.0,23.0,46.0
+Charlotte/Douglas Intl (KCLT),"Charlotte, NC",35.2162994,-80.9539428,22.0,21.0,43.0
+West Virginia Intl Yeager (KCRW),"Charleston, WV",38.3714489,-81.5934922,25.0,17.0,42.0
+Hartsfield-Jackson Intl (KATL),"Atlanta, GA",33.6324187,-84.4333116,18.0,19.0,37.0
+Albuquerque Intl Sunport (KABQ),"Albuquerque, NM",35.0405314,-106.6097996,17.0,18.0,35.0
+Meadows Fld (KBFL),"Bakersfield, CA",35.4357067,-119.0574886,15.0,15.0,30.0
+Okc Will Rogers Intl (KOKC),"Oklahoma City, OK",35.4068476,-97.6101616,13.0,13.0,26.0
+Memphis Intl (KMEM),"Memphis, TN",35.0443357,-89.9766186999999,12.0,12.0,24.0
+McGhee Tyson (KTYS),"Knoxville, TN",35.806504,-83.9982326,14.0,6.0,20.0
+Tucson Intl (KTUS),"Tucson, AZ",32.1205065,-110.9362203,10.0,10.0,20.0
+Brownsville Intl (KBRO),"Brownsville, TX",25.916041,-97.4188842,10.0,8.0,18.0
+Yakima Air Terminal (KYKM),"Yakima, WA",46.5675281,-120.5392171,9.0,9.0,18.0
+State College Regional (KUNV),"State College, PA",40.8513145,-77.8508453,8.0,8.0,16.0
+Detroit Metro Wayne Co (KDTW),"Detroit, MI",42.2132203,-83.3524824,2.0,11.0,13.0
+Lakefront (KNEW),"New Orleans, LA",30.041267,-90.0246162,7.0,6.0,13.0
+Gowen Field (KBOI),"Boise, ID",43.5609490999999,-116.2174493,6.0,6.0,12.0
+Orlando Intl (KMCO),"Orlando, FL",28.4244422,-81.3104595,5.0,6.0,11.0
+Mc Allen Miller Intl (KMFE),"Mission, TX",26.1770587,-98.2391389,6.0,5.0,11.0
+Rafael Hernandez (BQN / TJBQ),"Aguadilla, Puerto Rico",18.4953813,-67.1355779,5.0,4.0,9.0
+Randolph Afb (KRND),"Universal City, TX",29.5333661,-98.2864001,9.0,0.0,9.0
+Tallahassee Intl (KTLH),"Tallahassee, FL",30.3954251,-84.3450525,4.0,4.0,8.0
+Piedmont Triad Intl (KGSO),"Greensboro/High Point, NC",36.1029481,-79.9335219,4.0,4.0,8.0
+William P Hobby (KHOU),"Houston, TX",29.6459141,-95.2768950999999,4.0,4.0,8.0
+John F Kennedy Intl (KJFK),"New York, NY",40.6446124,-73.7797278,4.0,3.0,7.0
+New Orleans Intl (KMSY),"New Orleans, LA",29.9940319,-90.2596569999999,2.0,4.0,6.0
+Centennial (KAPA),"Denver, CO",39.5795225,-104.8462922,3.0,3.0,6.0
+Hollywood Burbank Airport (KBUR),"Los Angeles, CA",34.1983122,-118.3574036,5.0,0.0,5.0
+Oasis Ranger Station-U S Government (9FL7),"Everglades City, FL",25.8582443,-81.3850695,5.0,0.0,5.0
+Shreveport Rgnl (KSHV),"Shreveport, LA",32.4546292,-93.8284795,2.0,2.0,4.0
+Plattsburgh Intl (KPBG),"Plattsburgh, NY",44.6575396,-73.4669591999999,2.0,2.0,4.0
+Dupage (KDPA),"Chicago, IL",41.9067614,-88.2549078999999,3.0,1.0,4.0
+Niagara Falls Intl (KIAG),"Niagra Falls, NY",43.1070821,-78.9433049,2.0,2.0,4.0
+March Arb (KRIV),"Riverside, CA",33.9091823,-117.2704194,2.0,2.0,4.0
+Wichita Eisenhower (KICT),"Wichita, KS",37.6493348,-97.4273195,2.0,2.0,4.0
+Cincinnati/Northern Kentucky International Airport (KCVG),"Cincinnati, OH",39.051351,-84.6671453,4.0,0.0,4.0
+Portland Intl Jetport (KPWM),"Portland, ME",43.6460188,-70.3063521999999,2.0,2.0,4.0
+Philadelphia Intl (KPHL),"Philadelphia, PA",39.8729796999999,-75.2436987,2.0,2.0,4.0
+Washington Dulles Intl (KIAD),"Washington, DC",38.9072873,-77.0369274,1.0,2.0,3.0
+Clearwater Intl (KPIE),"Clearwater, FL",27.9122109,-82.6891001,3.0,0.0,3.0
+Fort Worth Alliance (KAFW),"Fort Worth, TX",32.9852708,-97.3130348,3.0,0.0,3.0
+Mobile Rgnl (KMOB),"Mobile, AL",30.6924859,-88.2455489,3.0,0.0,3.0
+Ontario Intl (KONT),"Ontario, CA",34.0559976,-117.5980922,1.0,1.0,2.0
+Lafayette Rgnl/Paul Fournet Fld (KLFT),"Lafayette, LA",30.2032156,-91.9938744999999,2.0,0.0,2.0
+Alvin Callender Fld (KNBG),"New Orleans, LA",29.8234426,-90.0154161,2.0,0.0,2.0
+Monroe Rgnl (KMLU),"Monroe, LA",32.5102311,-92.0436229,1.0,1.0,2.0
+St Louis Downtown (KCPS),"St. Louis, MO",38.6266074,-90.1916500999999,1.0,1.0,2.0
+N Maine (KPQI),"Presque Isle, ME",46.6922264,-68.0452499,1.0,1.0,2.0
+Boston Logan Intl (KBOS),"Boston, MA",42.365602,-71.0096136,1.0,1.0,2.0
+N Platte Rgnl Airport (LBF),"North Platte, NE",41.1326828,-100.6979522,1.0,1.0,2.0
+Topeka Rgnl (KFOE),"Topeka, KS",38.9468669,-95.6749095,1.0,1.0,2.0
+Birmingham-Shuttlesworth Intl (KBHM),"Birmingham, AL",33.5705125,-86.7529948999999,1.0,1.0,2.0
+Little Rock Afb (KLRF),"Little Rock, AR",34.7428286,-92.2762904,0.0,2.0,2.0
+Raleigh-Durham Intl (KRDU),"Raleigh, NC",35.8797678,-78.7855512,1.0,1.0,2.0
+"Near Tampa, FL","Tampa, FL",27.9516896,-82.4587526999999,1.0,0.0,1.0
+El Centro Naf (Vraciu Fld) (KNJK),"El Centro, CA",32.8114618,-115.6723029,0.0,1.0,1.0
+Brown Fld Muni (KSDM),"San Diego, CA",32.5691884,-116.9856305,1.0,0.0,1.0
+"Near Alexandria, LA","Alexandria, LA",31.3112936,-92.4451371,0.0,1.0,1.0
+Meml Fld (KHOT),"Hot Springs, AR",34.4826534,-93.095629,1.0,0.0,1.0
+Northwest Arkansas NTL,"Fayetteville, AR",36.0618562,-94.1579584,0.0,1.0,1.0
+Phoenix Sky Harbor Intl (KPHX),"Phoenix, AZ",33.436253,-112.012159,0.0,1.0,1.0
+John Glenn Columbus Intl Airport (KCMH),"Columbus, OH",39.998728,-82.884463,1.0,0.0,1.0
+Mahlon Sweet Fld (KEUG),"Eugene, OR",44.1217811,-123.2159003,1.0,0.0,1.0
