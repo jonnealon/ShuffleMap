@@ -1,5 +1,5 @@
 airport,city,lat,lon,departures,arrivals,total_flights
-Alexandria Intl (KAEX),"Alexandria, LA",31.3274006,-92.5451921,3491.0,3801.0,7292.0
+Alexandria Intl (KAEX),"Alexandria, LA",31.3274006,-92.5451921,3491.0,3802.0,7293.0
 Valley Intl (KHRL),"Harlingen, TX",26.2234764,-97.6623631,2838.0,2877.0,5715.0
 El Paso Intl (KELP),"El Paso, TX",31.8058228,-106.3705379,1523.0,1522.0,3045.0
 Phoenix-Mesa Gateway (KIWA),"Phoenix, AZ",33.3089787,-111.6559353,1146.0,1136.0,2282.0
@@ -30,7 +30,7 @@ Willow Run (KYIP),"Ypsilanti, MI",42.2349913,-83.5459542999999,128.0,119.0,247.0
 Miami Intl (KMIA),"Miami, FL",25.7923496,-80.2823059,123.0,122.0,245.0
 Jose Joaquin de Olmedo Int'l (GYE / SEGU),"Guayaquil, Ecuador",-2.230109,-79.9434312,118.0,120.0,238.0
 Buffalo Niagara Intl (KBUF),"Buffalo, NY",42.9394052,-78.7335011999999,115.0,115.0,230.0
-Tampa Intl (KTPA),"Tampa, FL",27.9768646,-82.5302804,129.0,85.0,214.0
+Tampa Intl (KTPA),"Tampa, FL",27.9768646,-82.5302804,130.0,85.0,215.0
 San Diego Intl (KSAN),"San Diego, CA",32.7328907,-117.1897122,107.0,106.0,213.0
 Eppley Airfield (KOMA),"Omaha, NE",41.3014753,-95.8945207,106.0,106.0,212.0
 Indianapolis Intl (KIND),"Indianapolis, IN",39.7222991999999,-86.3019561999999,102.0,101.0,203.0
@@ -107,10 +107,8 @@ Topeka Rgnl (KFOE),"Topeka, KS",38.9468669,-95.6749095,1.0,1.0,2.0
 Birmingham-Shuttlesworth Intl (KBHM),"Birmingham, AL",33.5705125,-86.7529948999999,1.0,1.0,2.0
 Little Rock Afb (KLRF),"Little Rock, AR",34.7428286,-92.2762904,0.0,2.0,2.0
 Raleigh-Durham Intl (KRDU),"Raleigh, NC",35.8797678,-78.7855512,1.0,1.0,2.0
-"Near Tampa, FL","Tampa, FL",27.9516896,-82.4587526999999,1.0,0.0,1.0
 El Centro Naf (Vraciu Fld) (KNJK),"El Centro, CA",32.8114618,-115.6723029,0.0,1.0,1.0
 Brown Fld Muni (KSDM),"San Diego, CA",32.5691884,-116.9856305,1.0,0.0,1.0
-"Near Alexandria, LA","Alexandria, LA",31.3112936,-92.4451371,0.0,1.0,1.0
 Meml Fld (KHOT),"Hot Springs, AR",34.4826534,-93.095629,1.0,0.0,1.0
 Northwest Arkansas NTL,"Fayetteville, AR",36.0618562,-94.1579584,0.0,1.0,1.0
 Phoenix Sky Harbor Intl (KPHX),"Phoenix, AZ",33.436253,-112.012159,0.0,1.0,1.0

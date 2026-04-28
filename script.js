@@ -32,6 +32,12 @@ let deckgl;
 // ── Animation state ──
 let animating      = false;
 
+// ── Map drift state ──
+let driftInterval  = null;
+let driftBearing   = 0;
+let driftLat       = 36;
+let driftPitch     = 0;
+
 // ── Preview state (hover when nothing selected) ──
 let previewMonths     = null;  // Set or null
 let previewContractor = null;  // string or null
@@ -408,6 +414,47 @@ function showAirportsOnly() {
   deckgl.setProps({ layers: [scatterLayer] });
 }
 
+
+function startDrift() {
+  if (driftInterval) return;
+  driftBearing = 0;
+  driftLat     = 36;
+  driftPitch   = 0;
+  driftInterval = setInterval(function() {
+    driftBearing += 0.04;
+    driftLat     += 0.003;
+    driftPitch    = Math.min(driftPitch + 0.06, 45);  // tilt up to 45°, then hold
+    deckgl.setProps({
+      initialViewState: {
+        longitude: -95,
+        latitude:  driftLat,
+        zoom:       3.8,
+        pitch:      driftPitch,
+        bearing:    driftBearing,
+        transitionDuration: 200,
+      }
+    });
+  }, 80);
+}
+
+function stopDrift() {
+  if (driftInterval) {
+    clearInterval(driftInterval);
+    driftInterval = null;
+  }
+  // Fly smoothly back to default view
+  deckgl.setProps({
+    initialViewState: {
+      longitude: -95,
+      latitude:   36,
+      zoom:        3.8,
+      pitch:       0,
+      bearing:     0,
+      transitionDuration: 1200,
+    }
+  });
+}
+
 function advanceIntro() {
   if (introPhase === 0) {
     // Show first paragraph
@@ -426,6 +473,7 @@ function advanceIntro() {
     introPhase = 3;
     document.getElementById('intro').classList.add('hidden');
     showAirportsOnly();
+    startDrift();
     setTimeout(function() {
       document.getElementById('storyAirports').classList.add('visible');
     }, 400);
@@ -441,15 +489,18 @@ function advanceIntro() {
     }, 400);
 
   } else if (introPhase === 4) {
-    // Stop animation, reveal full map and controls
-    introPhase = 5;
-    stopAnimation();
-    document.getElementById('storyAnimation').classList.remove('visible');
-    var panel = document.getElementById('panel');
-    panel.style.opacity = '1';
-    panel.style.pointerEvents = 'auto';
-    activeMonths = new Set(presentMonths);
-    updateLayers();
+  introPhase = 5;
+  stopAnimation();
+  stopDrift();
+  activeMonths = new Set();
+  document.querySelectorAll('.month-btn').forEach(function(b) {
+    b.classList.remove('active');
+  });
+  document.getElementById('storyAnimation').classList.remove('visible');
+  var panel = document.getElementById('panel');
+  panel.style.opacity = '1';
+  panel.style.pointerEvents = 'auto';
+  updateLayers();
   }
 }
 
