@@ -499,6 +499,75 @@
       margin: 16px 0;
     }
 
+    /* ── Second intro paragraph ── */
+    #introBody2 {
+      max-width: 560px;
+      font-family: 'Inter', sans-serif;
+      font-size: 15px;
+      line-height: 1.8;
+      color: rgba(255,255,255,0.75);
+      text-align: center;
+      opacity: 0;
+      transform: translateY(16px);
+      transition: opacity 0.7s ease, transform 0.7s ease;
+      margin-bottom: 48px;
+    }
+    #introBody2.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* ── Floating story panels (phases 3 & 4) ── */
+    .story-panel {
+      position: absolute;
+      bottom: 48px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 560px;
+      background: rgba(6, 8, 12, 0.92);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 28px 32px;
+      backdrop-filter: blur(12px);
+      z-index: 30;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.7s ease, transform 0.7s ease;
+      transform: translateX(-50%) translateY(12px);
+      cursor: pointer;
+    }
+
+    .story-panel.visible {
+      opacity: 1;
+      pointer-events: auto;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    .story-panel .sp-eyebrow {
+      font-family: 'Space Mono', monospace;
+      font-size: 9px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 10px;
+    }
+
+    .story-panel p {
+      font-family: 'Inter', sans-serif;
+      font-size: 14px;
+      line-height: 1.8;
+      color: rgba(255,255,255,0.75);
+    }
+
+    .story-panel .sp-prompt {
+      font-family: 'Space Mono', monospace;
+      font-size: 9px;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.25);
+      margin-top: 16px;
+    }
+
   </style>
 </head>
 <body>
@@ -558,7 +627,36 @@
       these flights generated millions in revenue while moving thousands of migrants
       across the country. This map traces that network.
     </p>
+    <p class="intro-body" id="introBody2">
+      Under the Trump administration's renewed immigration crackdown, ICE detention
+      capacity expanded rapidly. Arrests surged, facilities filled beyond capacity,
+      and the contracting apparatus that moves detainees between them grew with it
+      &mdash; generating millions in revenue for a small group of private aviation
+      companies operating largely outside public view.
+    </p>
     <div class="intro-prompt" id="introPrompt">Click anywhere to continue</div>
+  </div>
+
+  <!-- ── Story Panel: Airports ── -->
+  <div class="story-panel" id="storyAirports">
+    <div class="sp-eyebrow">The Network</div>
+    <p>The shuffle network runs not through major commercial hubs but through small
+    regional airports &mdash; many of them military fields or rural facilities with
+    minimal public oversight. Alexandria, Louisiana and Harlingen, Texas emerge as
+    the dominant nodes, processing thousands of transfers annually. Each circle
+    represents an active shuffle airport, scaled by total flight volume.</p>
+    <div class="sp-prompt">Click to see flights month by month &rarr;</div>
+  </div>
+
+  <!-- ── Story Panel: Animation ── -->
+  <div class="story-panel" id="storyAnimation">
+    <div class="sp-eyebrow">The Acceleration</div>
+    <p>Through 2025, the pace of internal shuffle flights accelerated sharply.
+    In January &mdash; the final month of the Biden administration &mdash; fewer
+    than 300 shuffle flights were recorded. By December, that number had grown
+    to nearly 1,200 per month, a fourfold increase tracking the expansion of
+    ICE enforcement operations.</p>
+    <div class="sp-prompt">Click to explore the full map &rarr;</div>
   </div>
 
   <script src="script.js"></script>

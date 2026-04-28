@@ -107,8 +107,8 @@ function handleHover(info) {
 
 // ── Render layers ──
 function updateLayers() {
-  // Don't update main layers until intro is dismissed
-  if (introPhase < 2) return;
+  // Don't update main layers until airports phase
+  if (introPhase < 3) return;
 
   // Use preview overrides when hovering with nothing selected
   var monthFilter      = previewMonths     || activeMonths;
@@ -355,13 +355,19 @@ function loadData() {
 setTimeout(loadData, 300);
 
 // ══════════════════════════════════════
-// INTRO SEQUENCE
+// INTRO / STORY SEQUENCE
+// Phases:
+//   0 — title only
+//   1 — first paragraph
+//   2 — second paragraph
+//   3 — intro out, airports visible, story panel 1
+//   4 — month animation + story panel 2
+//   5 — free exploration
 // ══════════════════════════════════════
 
-var introPhase = 0; // 0 = title only, 1 = paragraph visible, 2 = done
+var introPhase = 0;
 
 function showIntroBackground() {
-  // Show ~80 random flights behind the intro at low opacity
   if (!flightData.length) return;
   var sample = flightData
     .slice()
@@ -377,52 +383,87 @@ function showIntroBackground() {
     getTargetColor: function(d) { return getColor(d.Carrier, 20); },
     getHeight: 0.35,
     getWidth: 1,
-    getTilt: function(d) { 
-  var t = parseFloat(d.tilt) || 0;
-  return t < 0 ? -30 : 30;
-},
+    getTilt: 5,
     pickable: false,
   });
 
   deckgl.setProps({ layers: [bgArcs] });
 }
 
+function showAirportsOnly() {
+  var scatterLayer = new deck.ScatterplotLayer({
+    id: 'airport-nodes',
+    data: airportData,
+    getPosition: function(d) { return [parseFloat(d.lon), parseFloat(d.lat)]; },
+    getRadius:    function(d) { return airportRadius(d.total_flights); },
+    getFillColor: [255, 255, 255, 40],
+    getLineColor: [255, 255, 255, 120],
+    stroked: true,
+    lineWidthMinPixels: 1,
+    radiusMinPixels: 3,
+    radiusMaxPixels: 28,
+    pickable: true,
+    onHover: handleHover,
+  });
+  deckgl.setProps({ layers: [scatterLayer] });
+}
+
 function advanceIntro() {
   if (introPhase === 0) {
-    // Phase 1: show paragraph
+    // Show first paragraph
     document.getElementById('introBody').classList.add('visible');
-    document.getElementById('introPrompt').textContent = 'Click to explore the map';
-    document.getElementById('introPrompt').classList.add('phase2');
+    document.getElementById('introPrompt').textContent = 'Click to continue →';
     introPhase = 1;
 
   } else if (introPhase === 1) {
-    // Phase 2: dismiss intro, show full map
+    // Show second paragraph
+    document.getElementById('introBody2').classList.add('visible');
+    document.getElementById('introPrompt').textContent = 'Click to explore the map →';
     introPhase = 2;
-    document.getElementById('intro').classList.add('hidden');
 
-    // Reveal panel
+  } else if (introPhase === 2) {
+    // Dismiss intro, show airports + story panel 1
+    introPhase = 3;
+    document.getElementById('intro').classList.add('hidden');
+    showAirportsOnly();
+    setTimeout(function() {
+      document.getElementById('storyAirports').classList.add('visible');
+    }, 400);
+
+  } else if (introPhase === 3) {
+    // Hide airport panel, start month animation + story panel 2
+    introPhase = 4;
+    document.getElementById('storyAirports').classList.remove('visible');
+    activeContractors = new Set(MAIN_CONTRACTORS);
+    setTimeout(function() {
+      document.getElementById('storyAnimation').classList.add('visible');
+      startAnimation();
+    }, 400);
+
+  } else if (introPhase === 4) {
+    // Stop animation, reveal full map and controls
+    introPhase = 5;
+    stopAnimation();
+    document.getElementById('storyAnimation').classList.remove('visible');
     var panel = document.getElementById('panel');
     panel.style.opacity = '1';
     panel.style.pointerEvents = 'auto';
-
-    // Switch to full flight data
+    activeMonths = new Set(presentMonths);
     updateLayers();
   }
 }
 
 document.addEventListener('DOMContentLoaded', function() {
-  var intro = document.getElementById('intro');
+  document.getElementById('intro').addEventListener('click', advanceIntro);
+  document.getElementById('storyAirports').addEventListener('click', advanceIntro);
+  document.getElementById('storyAnimation').addEventListener('click', advanceIntro);
 
-  intro.addEventListener('click', advanceIntro);
   document.addEventListener('wheel', function(e) {
-    if (introPhase < 2) {
-      e.preventDefault();
-      advanceIntro();
-    }
+    if (introPhase < 5) { e.preventDefault(); advanceIntro(); }
   }, { passive: false });
 
   document.addEventListener('keydown', function(e) {
-    if ((e.key === ' ' || e.key === 'Enter' || e.key === 'ArrowDown') && introPhase < 2) {
+    if ((e.key === ' ' || e.key === 'Enter' || e.key === 'ArrowDown') && introPhase < 5) {
       advanceIntro();
     }
   });
