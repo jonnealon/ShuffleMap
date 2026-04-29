@@ -3,10 +3,8 @@
 // Deck.gl + Mapbox GL JS
 // ============================================================
 
-// ── Mapbox token ──
 mapboxgl.accessToken = 'pk.eyJ1IjoibmVhbG9uIiwiYSI6ImNtbmtsMzN4NDEwejcycXBremQxd3ZsdGYifQ.L-0eyFQp2rjCgxa6cxR2_w';
 
-// ── Contractor color palette ──
 const CONTRACTOR_CONFIG = {
   'GlobalX':             { color: [230, 57,  70],  hex: '#e63946' },
   'Eastern Air Express': { color: [69,  123, 157], hex: '#457b9d' },
@@ -21,37 +19,40 @@ const MAIN_CONTRACTORS = Object.keys(CONTRACTOR_CONFIG);
 const MONTH_NAMES = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 
 // ── State ──
-let flightData        = [];
-let airportData       = [];
-let routeFreq         = {};
-let activeContractors = new Set(MAIN_CONTRACTORS);
-let activeMonths      = new Set();
-let presentMonths     = [];
-let deckgl;
+var flightData        = [];
+var airportData       = [];
+var routeFreq         = {};
+var activeContractors = new Set(MAIN_CONTRACTORS);
+var activeMonths      = new Set();
+var presentMonths     = [];
+var previewMonths     = null;
+var previewContractor = null;
+var deckgl;
 
 // ── Animation state ──
-let animating      = false;
+var animating      = false;
+var animInterval   = null;
+var animMonthIndex = 0;
+var ANIM_SPEED_MS  = 2800;
 
-// ── Map drift state ──
-let driftInterval  = null;
-let driftBearing   = 0;
-let driftLat       = 36;
-let driftPitch     = 0;
+// ── Intro state ──
+// 0=title, 1=para1, 2=para2, 3=airports, 4=animation, 5=free
+var introPhase = 0;
 
-// ── Preview state (hover when nothing selected) ──
-let previewMonths     = null;  // Set or null
-let previewContractor = null;  // string or null
-let animInterval   = null;
-let animMonthIndex = 0;
-const ANIM_SPEED_MS = 1200;
+// ── Drift state ──
+var driftInterval = null;
+var driftBearing  = 0;
+var driftLat      = 36;
+var driftPitch    = 0;
+var driftDir      = 1;
 
 // ── Helpers ──
 function getGroup(carrier) {
   return MAIN_CONTRACTORS.includes(carrier) ? carrier : 'Other';
 }
 function getColor(carrier, alpha) {
-  alpha = alpha === undefined ? 180 : alpha;
-  const cfg = CONTRACTOR_CONFIG[getGroup(carrier)];
+  alpha = (alpha === undefined) ? 180 : alpha;
+  var cfg = CONTRACTOR_CONFIG[getGroup(carrier)];
   return [cfg.color[0], cfg.color[1], cfg.color[2], alpha];
 }
 function getHex(carrier) {
@@ -72,9 +73,9 @@ deckgl = new deck.DeckGL({
     latitude:   36,
     zoom:        3.8,
     pitch:       0,
-    bearing:      0,
+    bearing:     0,
   },
-  controller: true,
+  controller: { minZoom: 3.2 },
   layers: [],
 });
 
@@ -113,11 +114,8 @@ function handleHover(info) {
 
 // ── Render layers ──
 function updateLayers() {
-  // Don't update main layers until airports phase
   if (introPhase < 3) return;
-
-  // Use preview overrides when hovering with nothing selected
-  var monthFilter      = previewMonths     || activeMonths;
+  var monthFilter      = previewMonths || activeMonths;
   var contractorFilter = previewContractor ? new Set([previewContractor]) : activeContractors;
 
   var visible = flightData.filter(function(d) {
@@ -127,19 +125,23 @@ function updateLayers() {
   var arcLayer = new deck.ArcLayer({
     id: 'shuffle-arcs',
     data: visible,
-    getSourcePosition: function(d) { return [parseFloat(d.dep_lon),  parseFloat(d.dep_lat)];  },
+    getSourcePosition: function(d) { return [parseFloat(d.dep_lon), parseFloat(d.dep_lat)]; },
     getTargetPosition: function(d) { return [parseFloat(d.dest_lon), parseFloat(d.dest_lat)]; },
     getSourceColor: function(d) { return getColor(d.Carrier, 180); },
-    getTargetColor: function(d) { return getColor(d.Carrier, 180);  },
+    getTargetColor: function(d) { return getColor(d.Carrier, 180); },
     getHeight: 1,
     getWidth: 1.2,
-    getTilt: function(d) { 
-  var t = parseFloat(d.tilt) || 0;
-  return t < 0 ? 5 : 5;
-},
+    getTilt: function(d) {
+      var t = parseFloat(d.tilt) || 0;
+      return t < 0 ? 5 : 5;
+    },
     pickable: true,
-    onHover:  handleHover,
+    onHover: handleHover,
     updateTriggers: { getSourceColor: [...activeContractors], getTargetColor: [...activeContractors] },
+    transitions: {
+      getSourceColor: { duration: 600, type: 'interpolation' },
+      getTargetColor: { duration: 600, type: 'interpolation' },
+    },
   });
 
   var scatterLayer = new deck.ScatterplotLayer({
@@ -159,6 +161,24 @@ function updateLayers() {
 
   deckgl.setProps({ layers: [scatterLayer, arcLayer] });
   document.getElementById('flightCount').textContent = visible.length.toLocaleString();
+}
+
+function showAirportsOnly() {
+  var scatterLayer = new deck.ScatterplotLayer({
+    id: 'airport-nodes',
+    data: airportData,
+    getPosition: function(d) { return [parseFloat(d.lon), parseFloat(d.lat)]; },
+    getRadius:    function(d) { return airportRadius(d.total_flights); },
+    getFillColor: [255, 255, 255, 40],
+    getLineColor: [255, 255, 255, 120],
+    stroked: true,
+    lineWidthMinPixels: 1,
+    radiusMinPixels: 3,
+    radiusMaxPixels: 28,
+    pickable: true,
+    onHover: handleHover,
+  });
+  deckgl.setProps({ layers: [scatterLayer] });
 }
 
 // ── Contractor filter ──
@@ -188,18 +208,11 @@ function buildControls() {
       updateLayers();
     });
 
-    // Preview on hover when no contractors are selected
     row.addEventListener('mouseenter', function() {
-      if (activeContractors.size === 0) {
-        previewContractor = name;
-        updateLayers();
-      }
+      if (activeContractors.size === 0) { previewContractor = name; updateLayers(); }
     });
     row.addEventListener('mouseleave', function() {
-      if (previewContractor) {
-        previewContractor = null;
-        updateLayers();
-      }
+      if (previewContractor) { previewContractor = null; updateLayers(); }
     });
 
     var dot = document.createElement('span');
@@ -244,32 +257,25 @@ function buildMonthControls() {
     btn.dataset.month = monthNum;
 
     btn.addEventListener('click', function() {
-      if (animating) stopAnimation();
+      if (animating) stopAnimation(false);
       if (activeMonths.has(monthNum)) { activeMonths.delete(monthNum); btn.classList.remove('active'); }
       else { activeMonths.add(monthNum); btn.classList.add('active'); }
       updateMonthToggleLabel();
       updateLayers();
     });
 
-    // Preview on hover when no months are selected
     btn.addEventListener('mouseenter', function() {
-      if (activeMonths.size === 0) {
-        previewMonths = new Set([monthNum]);
-        updateLayers();
-      }
+      if (activeMonths.size === 0) { previewMonths = new Set([monthNum]); updateLayers(); }
     });
     btn.addEventListener('mouseleave', function() {
-      if (previewMonths) {
-        previewMonths = null;
-        updateLayers();
-      }
+      if (previewMonths) { previewMonths = null; updateLayers(); }
     });
 
     container.appendChild(btn);
   });
 
   document.getElementById('toggleMonths').addEventListener('click', function() {
-    if (animating) stopAnimation();
+    if (animating) stopAnimation(false);
     var allOn = presentMonths.every(function(m) { return activeMonths.has(m); });
     presentMonths.forEach(function(m) { if (allOn) activeMonths.delete(m); else activeMonths.add(m); });
     container.querySelectorAll('.month-btn').forEach(function(b) { b.classList.toggle('active', !allOn); });
@@ -278,12 +284,12 @@ function buildMonthControls() {
   });
 
   document.getElementById('playMonths').addEventListener('click', function() {
-    if (animating) stopAnimation(); else startAnimation();
+    if (animating) stopAnimation(false); else startAnimation();
   });
 }
 
 function updateMonthToggleLabel() {
-  var allOn = presentMonths.every(function(m) { return activeMonths.has(m); });
+  var allOn = presentMonths.length > 0 && presentMonths.every(function(m) { return activeMonths.has(m); });
   document.getElementById('toggleMonths').textContent = allOn ? 'Deselect All' : 'Select All';
 }
 
@@ -291,6 +297,8 @@ function updateMonthToggleLabel() {
 function startAnimation() {
   animating = true;
   document.getElementById('playMonths').textContent = '⏸ Pause';
+  var md = document.getElementById('animMonthDisplay');
+  if (md) md.classList.add('visible');
   animMonthIndex = 0;
   stepAnimation();
   animInterval = setInterval(function() {
@@ -299,18 +307,31 @@ function startAnimation() {
   }, ANIM_SPEED_MS);
 }
 
-function stopAnimation() {
+// clearMonths=true: called from phase 5, clears selection
+// clearMonths=false: called from pause button, restores all months
+function stopAnimation(clearMonths) {
   animating = false;
   clearInterval(animInterval);
   animInterval = null;
   document.getElementById('playMonths').textContent = '▶ Play';
-  presentMonths.forEach(function(m) { activeMonths.add(m); });
-  document.querySelectorAll('.month-btn').forEach(function(b) {
-    b.classList.add('active');
-    b.classList.remove('anim-current');
-  });
-  var label = document.getElementById('currentMonthLabel');
-  if (label) label.textContent = '';
+  var md = document.getElementById('animMonthDisplay');
+  if (md) md.classList.remove('visible');
+  var lbl = document.getElementById('currentMonthLabel');
+  if (lbl) lbl.textContent = '';
+
+  if (clearMonths) {
+    activeMonths = new Set();
+    document.querySelectorAll('.month-btn').forEach(function(b) {
+      b.classList.remove('active');
+      b.classList.remove('anim-current');
+    });
+  } else {
+    presentMonths.forEach(function(m) { activeMonths.add(m); });
+    document.querySelectorAll('.month-btn').forEach(function(b) {
+      b.classList.add('active');
+      b.classList.remove('anim-current');
+    });
+  }
   updateMonthToggleLabel();
   updateLayers();
 }
@@ -318,14 +339,125 @@ function stopAnimation() {
 function stepAnimation() {
   var currentMonth = presentMonths[animMonthIndex];
   activeMonths = new Set([currentMonth]);
+  previewMonths = null;
   document.querySelectorAll('.month-btn').forEach(function(b) {
     var isActive = parseInt(b.dataset.month) === currentMonth;
     b.classList.toggle('active', isActive);
     b.classList.toggle('anim-current', isActive);
   });
-  var label = document.getElementById('currentMonthLabel');
-  if (label) label.textContent = MONTH_NAMES[currentMonth - 1] + ' 2025';
+  var lbl = document.getElementById('currentMonthLabel');
+  if (lbl) lbl.textContent = MONTH_NAMES[currentMonth - 1] + ' 2025';
+  var monthCount = flightData.filter(function(d) { return d._month === currentMonth; }).length;
+  var mt = document.getElementById('animMonthText');
+  if (mt) mt.textContent = MONTH_NAMES[currentMonth - 1].toUpperCase() + ' 2025' + '  ·  ' + monthCount.toLocaleString() + ' flights';
   updateLayers();
+}
+
+// ── Drift ──
+function startDrift() {
+  if (driftInterval) return;
+  driftBearing = 0;
+  driftLat     = 36;
+  driftPitch   = 0;
+  driftDir     = 1;
+  var MAX_BEARING = 25;
+  driftInterval = setInterval(function() {
+    driftBearing += 0.03 * driftDir;
+    if (driftBearing >= MAX_BEARING)  driftDir = -1;
+    if (driftBearing <= -MAX_BEARING) driftDir = 1;
+    driftLat += 0.002 * driftDir;
+    driftLat = Math.max(33, Math.min(39, driftLat));
+    driftPitch = Math.min(driftPitch + 0.04, 38);
+    deckgl.setProps({
+      initialViewState: {
+        longitude: -95,
+        latitude:  driftLat,
+        zoom:       3.8,
+        pitch:      driftPitch,
+        bearing:    driftBearing,
+        transitionDuration: 200,
+      }
+    });
+  }, 80);
+}
+
+function stopDrift() {
+  if (driftInterval) { clearInterval(driftInterval); driftInterval = null; }
+  deckgl.setProps({
+    initialViewState: {
+      longitude: -95,
+      latitude:   36,
+      zoom:        3.8,
+      pitch:       0,
+      bearing:     0,
+      transitionDuration: 1200,
+    }
+  });
+}
+
+// ── Intro background arcs ──
+function showIntroBackground() {
+  if (!flightData.length) return;
+  var sample = flightData.slice().sort(function() { return Math.random() - 0.5; }).slice(0, 80);
+  deckgl.setProps({
+    layers: [new deck.ArcLayer({
+      id: 'intro-arcs',
+      data: sample,
+      getSourcePosition: function(d) { return [parseFloat(d.dep_lon), parseFloat(d.dep_lat)]; },
+      getTargetPosition: function(d) { return [parseFloat(d.dest_lon), parseFloat(d.dest_lat)]; },
+      getSourceColor: function(d) { return getColor(d.Carrier, 120); },
+      getTargetColor: function(d) { return getColor(d.Carrier, 20); },
+      getHeight: 0.35,
+      getWidth: 1,
+      getTilt: 5,
+      pickable: false,
+    })]
+  });
+}
+
+// ── Intro sequence ──
+function advanceIntro() {
+  if (introPhase === 0) {
+    document.getElementById('introBody').classList.add('visible');
+    document.getElementById('introPrompt').textContent = 'Click to continue \u2192';
+    introPhase = 1;
+
+  } else if (introPhase === 1) {
+    document.getElementById('introBody2').classList.add('visible');
+    document.getElementById('introPrompt').textContent = 'Click to explore the map \u2192';
+    introPhase = 2;
+
+  } else if (introPhase === 2) {
+    introPhase = 3;
+    document.getElementById('intro').classList.add('hidden');
+    document.getElementById('storyOverlay').classList.add('active');
+    showAirportsOnly();
+    startDrift();
+    setTimeout(function() {
+      document.getElementById('storyAirports').classList.add('visible');
+    }, 400);
+
+  } else if (introPhase === 3) {
+    introPhase = 4;
+    document.getElementById('storyAirports').classList.remove('visible');
+    activeContractors = new Set(MAIN_CONTRACTORS);
+    setTimeout(function() {
+      document.getElementById('storyAnimation').classList.add('visible');
+      startAnimation();
+    }, 400);
+
+  } else if (introPhase === 4) {
+    introPhase = 5;
+    stopAnimation(true);   // clears months, shows Select All
+    stopDrift();
+    document.getElementById('storyAnimation').classList.remove('visible');
+    document.getElementById('storyOverlay').classList.remove('active');
+    document.getElementById('storyOverlay').style.display = 'none';
+    var panel = document.getElementById('panel');
+    panel.style.opacity = '1';
+    panel.style.pointerEvents = 'auto';
+    updateLayers();
+  }
 }
 
 // ── Load data ──
@@ -350,7 +482,6 @@ function loadData() {
           buildControls();
           buildMonthControls();
           document.getElementById('loading').classList.add('hidden');
-          // Show sparse background arcs behind intro
           showIntroBackground();
         },
       });
@@ -360,157 +491,22 @@ function loadData() {
 
 setTimeout(loadData, 300);
 
-// ══════════════════════════════════════
-// INTRO / STORY SEQUENCE
-// Phases:
-//   0 — title only
-//   1 — first paragraph
-//   2 — second paragraph
-//   3 — intro out, airports visible, story panel 1
-//   4 — month animation + story panel 2
-//   5 — free exploration
-// ══════════════════════════════════════
-
-var introPhase = 0;
-
-function showIntroBackground() {
-  if (!flightData.length) return;
-  var sample = flightData
-    .slice()
-    .sort(function() { return Math.random() - 0.5; })
-    .slice(0, 80);
-
-  var bgArcs = new deck.ArcLayer({
-    id: 'intro-arcs',
-    data: sample,
-    getSourcePosition: function(d) { return [parseFloat(d.dep_lon), parseFloat(d.dep_lat)]; },
-    getTargetPosition: function(d) { return [parseFloat(d.dest_lon), parseFloat(d.dest_lat)]; },
-    getSourceColor: function(d) { return getColor(d.Carrier, 120); },
-    getTargetColor: function(d) { return getColor(d.Carrier, 20); },
-    getHeight: 0.35,
-    getWidth: 1,
-    getTilt: 5,
-    pickable: false,
-  });
-
-  deckgl.setProps({ layers: [bgArcs] });
-}
-
-function showAirportsOnly() {
-  var scatterLayer = new deck.ScatterplotLayer({
-    id: 'airport-nodes',
-    data: airportData,
-    getPosition: function(d) { return [parseFloat(d.lon), parseFloat(d.lat)]; },
-    getRadius:    function(d) { return airportRadius(d.total_flights); },
-    getFillColor: [255, 255, 255, 40],
-    getLineColor: [255, 255, 255, 120],
-    stroked: true,
-    lineWidthMinPixels: 1,
-    radiusMinPixels: 3,
-    radiusMaxPixels: 28,
-    pickable: true,
-    onHover: handleHover,
-  });
-  deckgl.setProps({ layers: [scatterLayer] });
-}
-
-
-function startDrift() {
-  if (driftInterval) return;
-  driftBearing = 0;
-  driftLat     = 36;
-  driftPitch   = 0;
-  driftInterval = setInterval(function() {
-    driftBearing += 0.04;
-    driftLat     += 0.003;
-    driftPitch    = Math.min(driftPitch + 0.06, 45);  // tilt up to 45°, then hold
-    deckgl.setProps({
-      initialViewState: {
-        longitude: -95,
-        latitude:  driftLat,
-        zoom:       3.8,
-        pitch:      driftPitch,
-        bearing:    driftBearing,
-        transitionDuration: 200,
-      }
-    });
-  }, 80);
-}
-
-function stopDrift() {
-  if (driftInterval) {
-    clearInterval(driftInterval);
-    driftInterval = null;
-  }
-  // Fly smoothly back to default view
-  deckgl.setProps({
-    initialViewState: {
-      longitude: -95,
-      latitude:   36,
-      zoom:        3.8,
-      pitch:       0,
-      bearing:     0,
-      transitionDuration: 1200,
-    }
-  });
-}
-
-function advanceIntro() {
-  if (introPhase === 0) {
-    // Show first paragraph
-    document.getElementById('introBody').classList.add('visible');
-    document.getElementById('introPrompt').textContent = 'Click to continue →';
-    introPhase = 1;
-
-  } else if (introPhase === 1) {
-    // Show second paragraph
-    document.getElementById('introBody2').classList.add('visible');
-    document.getElementById('introPrompt').textContent = 'Click to explore the map →';
-    introPhase = 2;
-
-  } else if (introPhase === 2) {
-    // Dismiss intro, show airports + story panel 1
-    introPhase = 3;
-    document.getElementById('intro').classList.add('hidden');
-    showAirportsOnly();
-    startDrift();
-    setTimeout(function() {
-      document.getElementById('storyAirports').classList.add('visible');
-    }, 400);
-
-  } else if (introPhase === 3) {
-    // Hide airport panel, start month animation + story panel 2
-    introPhase = 4;
-    document.getElementById('storyAirports').classList.remove('visible');
-    activeContractors = new Set(MAIN_CONTRACTORS);
-    setTimeout(function() {
-      document.getElementById('storyAnimation').classList.add('visible');
-      startAnimation();
-    }, 400);
-
-  } else if (introPhase === 4) {
-  introPhase = 5;
-  stopAnimation();
-  stopDrift();
-  activeMonths = new Set();
-  document.querySelectorAll('.month-btn').forEach(function(b) {
-    b.classList.remove('active');
-  });
-  document.getElementById('storyAnimation').classList.remove('visible');
-  var panel = document.getElementById('panel');
-  panel.style.opacity = '1';
-  panel.style.pointerEvents = 'auto';
-  updateLayers();
-  }
-}
-
+// ── Event listeners ──
 document.addEventListener('DOMContentLoaded', function() {
   document.getElementById('intro').addEventListener('click', advanceIntro);
+  document.getElementById('storyOverlay').addEventListener('click', advanceIntro);
   document.getElementById('storyAirports').addEventListener('click', advanceIntro);
   document.getElementById('storyAnimation').addEventListener('click', advanceIntro);
 
+  var lastWheelTime = 0;
   document.addEventListener('wheel', function(e) {
-    if (introPhase < 5) { e.preventDefault(); advanceIntro(); }
+    if (introPhase >= 5) return;
+    e.preventDefault();
+    var now = Date.now();
+    if (now - lastWheelTime < 800) return;
+    if (Math.abs(e.deltaY) < 10 && e.deltaMode === 0) return;
+    lastWheelTime = now;
+    advanceIntro();
   }, { passive: false });
 
   document.addEventListener('keydown', function(e) {

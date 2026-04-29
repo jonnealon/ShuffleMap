@@ -365,7 +365,7 @@
       text-align: center;
       opacity: 0;
       transform: translateY(16px);
-      transition: opacity 0.7s ease, transform 0.7s ease;
+      transition: opacity 0.7s ease;
       margin-bottom: 48px;
     }
 
@@ -509,7 +509,7 @@
       text-align: center;
       opacity: 0;
       transform: translateY(16px);
-      transition: opacity 0.7s ease, transform 0.7s ease;
+      transition: opacity 0.7s ease;
       margin-bottom: 48px;
     }
     #introBody2.visible {
@@ -520,10 +520,10 @@
     /* ── Floating story panels (phases 3 & 4) ── */
     .story-panel {
       position: absolute;
-      bottom: 48px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 560px;
+      top: 50%;
+      right: 32px;
+      transform: translateY(-50%);
+      width: 340px;
       background: rgba(6, 8, 12, 0.92);
       border: 1px solid var(--border);
       border-radius: 4px;
@@ -532,15 +532,15 @@
       z-index: 30;
       opacity: 0;
       pointer-events: none;
-      transition: opacity 0.7s ease, transform 0.7s ease;
-      transform: translateX(-50%) translateY(12px);
+      transition: opacity 0.7s ease;
+      transform: translateY(-50%);
       cursor: pointer;
     }
 
     .story-panel.visible {
       opacity: 1;
       pointer-events: auto;
-      transform: translateX(-50%) translateY(0);
+      transform: translateY(-50%);
     }
 
     .story-panel .sp-eyebrow {
@@ -568,6 +568,45 @@
       margin-top: 16px;
     }
 
+
+    /* ── Month label below story panel ── */
+    #animMonthDisplay {
+      position: absolute;
+      top: calc(50% + 180px);
+      right: 32px;
+      width: 340px;
+      background: rgba(6, 8, 12, 0.92);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 14px 32px;
+      backdrop-filter: blur(12px);
+      z-index: 30;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.5s ease;
+      text-align: center;
+    }
+    #animMonthDisplay.visible {
+      opacity: 1;
+    }
+    #animMonthDisplay .month-display-text {
+      font-family: 'Inter', monospace;
+      font-size: 18px;
+      font-weight: 700;
+      color: #fff;
+      letter-spacing: 0.08em;
+    }
+
+    #storyOverlay {
+      position: fixed;
+      inset: 0;
+      z-index: 25;
+      display: none;
+      cursor: pointer;
+    }
+    #storyOverlay.active {
+      display: block;
+    }
   </style>
 </head>
 <body>
@@ -659,6 +698,8 @@
     <div class="sp-prompt">Click to explore the full map &rarr;</div>
   </div>
 
+  <div id="animMonthDisplay"><div class="month-display-text" id="animMonthText"></div></div>
+  <div id="storyOverlay"></div>
   <script src="script.js"></script>
 </body>
 </html>
