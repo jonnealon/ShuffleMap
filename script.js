@@ -1,6 +1,7 @@
 // ============================================================
 // ICE Domestic Shuffle Flights — 2025
 // Deck.gl + Mapbox GL JS
+// Jon Nealon AGOG 510 Final Project
 // ============================================================
 
 mapboxgl.accessToken = 'pk.eyJ1IjoibmVhbG9uIiwiYSI6ImNtbmtsMzN4NDEwejcycXBremQxd3ZsdGYifQ.L-0eyFQp2rjCgxa6cxR2_w';
@@ -180,6 +181,8 @@ function showAirportsOnly() {
   });
   deckgl.setProps({ layers: [scatterLayer] });
 }
+// Hi Joey, Are you looking through my code? 
+// thanks for the great class - Jon 
 
 // ── Contractor filter ──
 function buildControls() {
